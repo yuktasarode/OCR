@@ -65,17 +65,35 @@ OCR confidence is not accuracy. The JSON report compares OCR output against revi
 
 The included ground truth is a manual transcription and should be reviewed by the data owner before treating the score as a formal benchmark.
 
-### Current sample result
+### Solution Comparison
 
+#### Solution 1: RapidOCR
+
+- OCR model: RapidOCR ONNX Runtime for all fields
 - Rows detected: 11 of 11
-- Exact accuracy: 38.46% -> 41.03%
-- Character accuracy: 62.36% -> 76.70%
-- Name accuracy: 53.47% -> 69.74%
-- Phone accuracy: 53.33% -> 80.00%
+- Overall exact-field accuracy: 38.46%
+- Overall character accuracy: 62.36%
+- Name accuracy: 0% exact, 53.47% character
+- Phone accuracy: 0% exact, 53.33% character
+- Blood-group accuracy: 36.36% exact, 41.67% character
+- Unit-number accuracy: 100% exact, 100% character (layout-assisted)
+- Accuracy report: `reports/sample_accuracy_baseline.json`
+
+#### Solution 2: Hybrid RapidOCR + TrOCR
+
+- OCR models: TrOCR Small Handwritten for names; RapidOCR for unit numbers and blood groups; dual-preprocessing RapidOCR for phone numbers
+- Rows detected: 11 of 11
+- Overall exact-field accuracy: 41.03%
+- Overall character accuracy: 76.70%
+- Name accuracy: 0% exact, 69.74% character
+- Phone accuracy: 16.67% exact, 80.00% character
+- Blood-group accuracy: 36.36% exact, 41.67% character
+- Unit-number accuracy: 100% exact, 100% character (layout-assisted)
 - Tests: 13 passed
 - Rows requiring review: 11 of 11
+- Accuracy report: `reports/sample_accuracy.json`
 
-Compared with the original RapidOCR-only baseline, exact accuracy increased from 38.46% to 41.03%, and character accuracy increased from 62.36% to 76.70%. The original result is retained in `reports/sample_accuracy_baseline.json`.
+Solution 2 improves exact accuracy by 2.57 percentage points and character accuracy by 14.34 percentage points. It is the current recommended configuration.
 
 After the model has been downloaded once, run without model network access:
 
