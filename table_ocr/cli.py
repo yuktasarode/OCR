@@ -5,7 +5,9 @@ from pathlib import Path
 from table_ocr.evaluate import evaluate_rows
 from table_ocr.export import export_rows
 from table_ocr.extract import extract_images
+from table_ocr.extract import FormExtractor
 from table_ocr.io import load_rows
+from table_ocr.recognizers import TrOCRRecognizer
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -13,12 +15,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("images", nargs="+", type=Path, help="One or more local image paths")
     parser.add_argument("--output", type=Path, default=Path("output/donors"), help="Output path without extension")
     parser.add_argument("--ground-truth", type=Path, help="Reviewed CSV used to calculate OCR accuracy")
+    parser.add_argument("--name-engine", choices=("rapidocr", "trocr"), default="rapidocr", help="Recognizer for donor-name cells")
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
-    rows = extract_images(args.images)
+    name_recognizer = TrOCRRecognizer() if args.name_engine == "trocr" else None
+    rows = extract_images(args.images, FormExtractor(name_recognizer=name_recognizer))
     csv_path, xlsx_path = export_rows(rows, args.output)
     print(f"Extracted {len(rows)} rows")
     print(f"CSV: {csv_path}")

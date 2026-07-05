@@ -29,5 +29,5 @@ def normalize_blood_group(value: str) -> str:
 
 def normalize_name(value: str) -> str:
     value = re.sub(r"[^A-Za-z. '\-]", " ", value)
-    value = re.sub(r"\s+", " ", value).strip(" .-")
+    value = re.sub(r"\s+", " ", value).strip(" .-'")
     return value.title()

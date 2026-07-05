@@ -1,5 +1,6 @@
 .venv/
 .vendor/
+.models/
 __pycache__/
 .pytest_cache/
 output/

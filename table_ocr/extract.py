@@ -3,10 +3,11 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from rapidocr_onnxruntime import RapidOCR
 
 from table_ocr.models import TableRow
 from table_ocr.normalize import normalize_blood_group, normalize_name, normalize_phone, normalize_unit
+from table_ocr.preprocess import preprocess_cell
+from table_ocr.recognizers import RapidRecognizer
 
 
 ROW_BOUNDARY_RATIOS = (0.228, 0.283, 0.349, 0.416, 0.486, 0.554, 0.623, 0.694, 0.772, 0.851, 0.932, 1.0)
@@ -20,10 +21,11 @@ COLUMN_RATIOS = {
 
 
 class FormExtractor:
-    def __init__(self, engine=None):
-        self.engine = engine or RapidOCR()
+    def __init__(self, engine=None, name_recognizer=None):
+        self.recognizer = RapidRecognizer(engine)
+        self.name_recognizer = name_recognizer or self.recognizer
 
-    def _read_cell(self, image: np.ndarray, x_range: tuple[float, float], y_range: tuple[float, float]):
+    def _read_cell(self, image: np.ndarray, field: str, x_range: tuple[float, float], y_range: tuple[float, float]):
         height, width = image.shape[:2]
         x1, x2 = (round(ratio * width) for ratio in x_range)
         y1, y2 = (round(ratio * height) for ratio in y_range)
@@ -31,14 +33,14 @@ class FormExtractor:
         crop = image[y1 + margin : y2 - margin, x1 + 2 : x2 - 2]
         if crop.size == 0:
             return "", 0.0
-        crop = cv2.resize(crop, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
-        result, _ = self.engine(crop)
-        if not result:
-            return "", 0.0
-        ordered = sorted(result, key=lambda item: (min(point[0] for point in item[0]), min(point[1] for point in item[0])))
-        text = " ".join(item[1] for item in ordered)
-        confidence = sum(float(item[2]) for item in ordered) / len(ordered)
-        return text, confidence
+        if field == "name":
+            return self.name_recognizer.recognize(preprocess_cell(crop, field))
+        legacy_crop = cv2.resize(crop, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+        legacy_result = self.recognizer.recognize(legacy_crop)
+        if field != "phone":
+            return legacy_result
+        processed_result = self.recognizer.recognize(preprocess_cell(crop, field))
+        return max((legacy_result, processed_result), key=_phone_candidate_score)
 
     def extract(self, image_path: Path) -> list[TableRow]:
         image = cv2.imread(str(image_path))
@@ -49,7 +51,7 @@ class FormExtractor:
             values = {}
             confidences = []
             for field, x_range in COLUMN_RATIOS.items():
-                text, confidence = self._read_cell(image, x_range, (top, bottom))
+                text, confidence = self._read_cell(image, field, x_range, (top, bottom))
                 values[field] = text
                 if text:
                     confidences.append(confidence)
@@ -79,3 +81,9 @@ def extract_images(image_paths: list[Path], extractor=None) -> list[TableRow]:
             raise FileNotFoundError(f"Image not found: {image_path}")
         rows.extend(extractor.extract(image_path))
     return rows
+
+
+def _phone_candidate_score(result: tuple[str, float]) -> tuple[bool, int, float]:
+    text, confidence = result
+    digits = normalize_phone(text)
+    return len(digits) == 10, len(digits), confidence

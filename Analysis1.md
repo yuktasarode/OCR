@@ -63,3 +63,14 @@ The current ground-truth CSV should be reviewed by the data owner, and several a
 ## Recommended Next Step
 
 Keep the existing table extraction and export pipeline. Add a handwriting-recognition option for donor-name cells, improve field-specific preprocessing, and run a controlled RapidOCR-versus-TrOCR benchmark. Adopt a new model only if it produces a meaningful measured improvement without unacceptable processing time or deployment size.
+
+## First Improvement Result
+
+The controlled hybrid experiment uses TrOCR Small Handwritten for donor names, RapidOCR for unit and blood-group fields, and both original and enhanced phone crops with format-based candidate selection.
+
+- Exact-field accuracy improved from 38.46% to 41.03%.
+- Overall character accuracy improved from 62.36% to 76.70%.
+- Donor-name character accuracy improved from 53.47% to 69.74%.
+- Complete-phone character accuracy improved from 53.33% to 80.00%.
+
+This is a meaningful improvement on the sample, but all rows still require review and the result is based on only one image. Fine-tuning should wait until a larger reviewed dataset is available.

@@ -3,8 +3,8 @@
   "predicted_rows": 11,
   "matched_rows": 11,
   "evaluated_fields": 39,
-  "overall_exact_field_accuracy": 0.3846,
-  "overall_character_accuracy": 0.6236,
+  "overall_exact_field_accuracy": 0.4103,
+  "overall_character_accuracy": 0.767,
   "fields": {
     "unit_no": {
       "evaluated": 11,
@@ -14,7 +14,7 @@
     "donor_name": {
       "evaluated": 11,
       "exact_accuracy": 0.0,
-      "character_accuracy": 0.5347
+      "character_accuracy": 0.6974
     },
     "blood_group": {
       "evaluated": 11,
@@ -23,8 +23,8 @@
     },
     "contact_no": {
       "evaluated": 6,
-      "exact_accuracy": 0.0,
-      "character_accuracy": 0.5333
+      "exact_accuracy": 0.1667,
+      "character_accuracy": 0.8
     }
   }
 }

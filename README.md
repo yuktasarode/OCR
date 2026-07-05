@@ -5,8 +5,8 @@ This Python MVP converts one or more photographed donor-registration tables into
 ## Current Status
 
 - Outputs: `output/donors.csv`, `output/donors.xlsx`
-- Accuracy: 38.46% exact fields, 62.36% character accuracy. See `reports/sample_accuracy.json`
-- Tests: 9 passed
+- Accuracy: 41.03% exact fields, 76.70% character accuracy. See `reports/sample_accuracy.json`
+- Tests: 13 passed
 
 The local OCR pipeline is implemented. The frontend, upload API, hosting, and Play Store release described later in this README are the planned next phases.
 
@@ -22,18 +22,21 @@ From the project directory, create a virtual environment and install the pinned 
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip install -r requirements-handwriting.txt
 ```
 
 On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1` and use `python` in place of `.venv/bin/python` in the commands below.
 
+The first TrOCR run downloads the open-source handwriting model into `.models`. Later runs can set `HF_HUB_OFFLINE=1` to prevent all model-network checks.
+
 ## Run The Sample
 
 ```bash
-.venv/bin/python -m table_ocr.cli \
-  "sample.jpeg" \
+HF_HOME=.models .venv/bin/python -m table_ocr.cli \
+  sample.jpeg \
   --output output/donors \
-  --ground-truth ground_truth/sample.csv
+  --ground-truth ground_truth/sample.csv \
+  --name-engine trocr
 ```
 
 The command creates `output/donors.csv`, `output/donors.xlsx`, and `output/donors_accuracy.json`. Rows with uncertain, missing, or malformed fields have `needs_review=true`.
@@ -62,14 +65,27 @@ OCR confidence is not accuracy. The JSON report compares OCR output against revi
 
 The included ground truth is a manual transcription and should be reviewed by the data owner before treating the score as a formal benchmark.
 
-### Current sample baseline
+### Current sample result
 
 - Rows detected: 11 of 11
-- Exact field accuracy: 38.46%
-- Character accuracy: 62.36%
-- Name character accuracy: 53.47%
-- Complete-phone character accuracy: 53.33%
+- Exact accuracy: 38.46% -> 41.03%
+- Character accuracy: 62.36% -> 76.70%
+- Name accuracy: 53.47% -> 69.74%
+- Phone accuracy: 53.33% -> 80.00%
+- Tests: 13 passed
 - Rows requiring review: 11 of 11
+
+Compared with the original RapidOCR-only baseline, exact accuracy increased from 38.46% to 41.03%, and character accuracy increased from 62.36% to 76.70%. The original result is retained in `reports/sample_accuracy_baseline.json`.
+
+After the model has been downloaded once, run without model network access:
+
+```bash
+HF_HOME=.models HF_HUB_OFFLINE=1 .venv/bin/python -m table_ocr.cli \
+  sample.jpeg \
+  --output output/donors \
+  --ground-truth ground_truth/sample.csv \
+  --name-engine trocr
+```
 
 Unit numbers use the form's known sequential numbering to repair OCR and therefore score 100%; this is layout-assisted extraction, not pure handwriting recognition. The current result validates the local workflow and output format, but its handwriting accuracy is too low for unattended use. A correction screen should be part of the mobile/web MVP.
 
@@ -79,7 +95,7 @@ Unit numbers use the form's known sequential numbering to repair OCR and therefo
 .venv/bin/python -m pytest
 ```
 
-The current suite contains 9 tests covering normalization, accuracy calculations, multi-image handling, error handling, CSV export, and XLSX export.
+The current suite contains 13 tests covering preprocessing, recognizer routing, normalization, accuracy calculations, multi-image handling, error handling, CSV export, and XLSX export.
 
 ## Output Columns
 
