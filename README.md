@@ -31,7 +31,7 @@ On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1
 
 ```bash
 .venv/bin/python -m table_ocr.cli \
-  "WhatsApp Image 2026-07-05 at 4.22.41 PM.jpeg" \
+  "sample.jpeg" \
   --output output/donors \
   --ground-truth ground_truth/sample.csv
 ```
