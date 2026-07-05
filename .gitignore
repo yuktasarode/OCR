@@ -8,3 +8,4 @@ output/
 ground_truth/
 .code-assist/2026-07-05-image-table-ocr/build-local-ocr-mvp/logs
 sample.jpeg
+synthetic_images/
