@@ -18,13 +18,32 @@ def normalize_phone(value: str) -> str:
 
 
 def normalize_blood_group(value: str) -> str:
-    compact = re.sub(r"[^A-Z0-9+-]", "", value.upper())
-    compact = compact.replace("0", "O")
-    group_match = re.search(r"(AB|A|B|O)", compact)
-    if not group_match:
+    compact = re.sub(r"[^A-Z0-9+-]", "", value.upper()).replace("0", "O")
+    match = re.fullmatch(r"(AB|A|B|O)(.*)", compact)
+    if not match:
         return ""
-    suffix = "-" if "NEG" in compact or compact.endswith("-") else "+"
-    return f"{group_match.group(1)}{suffix}"
+    group, polarity = match.groups()
+    negative_tokens = {"-", "N", "NE", "NEG", "NEGATIVE", "VE", "-VE"}
+    positive_tokens = {"", "+", "P", "PO", "POS", "POSITIVE", "PE", "PC", "PES", "A"}
+    if polarity in negative_tokens:
+        return f"{group}-"
+    if polarity in positive_tokens or re.fullmatch(r"P[A-Z]{0,2}", polarity):
+        return f"{group}+"
+    return ""
+
+
+def resolve_blood_group(cell_text: str, row_text: str = "") -> str:
+    cell_group = normalize_blood_group(cell_text)
+    if cell_group:
+        return cell_group
+    compact_cell = re.sub(r"[^A-Z]", "", cell_text.upper())
+    if compact_cell in {"P", "PO", "POS", "POSITIVE"}:
+        return "O+"
+    for token in re.findall(r"[A-Za-z0-9+-]+", row_text):
+        group = normalize_blood_group(token)
+        if group:
+            return group
+    return ""
 
 
 def normalize_name(value: str) -> str:

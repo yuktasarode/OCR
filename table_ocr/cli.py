@@ -16,12 +16,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output", type=Path, default=Path("output/donors"), help="Output path without extension")
     parser.add_argument("--ground-truth", type=Path, help="Reviewed CSV used to calculate OCR accuracy")
     parser.add_argument("--name-engine", choices=("rapidocr", "trocr"), default="rapidocr", help="Recognizer for donor-name cells")
+    parser.add_argument("--trocr-model", default="microsoft/trocr-small-handwritten", help="TrOCR checkpoint used for donor names")
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
-    name_recognizer = TrOCRRecognizer() if args.name_engine == "trocr" else None
+    name_recognizer = TrOCRRecognizer(args.trocr_model) if args.name_engine == "trocr" else None
     rows = extract_images(args.images, FormExtractor(name_recognizer=name_recognizer))
     csv_path, xlsx_path = export_rows(rows, args.output)
     print(f"Extracted {len(rows)} rows")

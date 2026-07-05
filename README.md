@@ -5,8 +5,8 @@ This Python MVP converts one or more photographed donor-registration tables into
 ## Current Status
 
 - Outputs: `output/donors.csv`, `output/donors.xlsx`
-- Accuracy: 41.03% exact fields, 76.70% character accuracy. See `reports/sample_accuracy.json`
-- Tests: 13 passed
+- Accuracy: 53.85% exact fields, 80.00% character accuracy. See `reports/sample_accuracy.json`
+- Tests: 15 passed
 
 The local OCR pipeline is implemented. The frontend, upload API, hosting, and Play Store release described later in this README are the planned next phases.
 
@@ -36,7 +36,8 @@ HF_HOME=.models .venv/bin/python -m table_ocr.cli \
   sample.jpeg \
   --output output/donors \
   --ground-truth ground_truth/sample.csv \
-  --name-engine trocr
+  --name-engine trocr \
+  --trocr-model microsoft/trocr-base-handwritten
 ```
 
 The command creates `output/donors.csv`, `output/donors.xlsx`, and `output/donors_accuracy.json`. Rows with uncertain, missing, or malformed fields have `needs_review=true`.
@@ -91,9 +92,23 @@ The included ground truth is a manual transcription and should be reviewed by th
 - Unit-number accuracy: 100% exact, 100% character (layout-assisted)
 - Tests: 13 passed
 - Rows requiring review: 11 of 11
+- Accuracy report: `reports/sample_accuracy_hybrid_small.json`
+
+#### Solution 3: Hybrid RapidOCR + TrOCR Base + Blood Polarity Fallback
+
+- OCR models: TrOCR Base Handwritten for names; RapidOCR for unit numbers and blood groups; wider-row `Pos`/`Neg` fallback for blood groups; dual-preprocessing RapidOCR for phone numbers
+- Rows detected: 11 of 11
+- Overall exact-field accuracy: 53.85%
+- Overall character accuracy: 80.00%
+- Name accuracy: 27.27% exact, 74.51% character
+- Phone accuracy: 16.67% exact, 80.00% character
+- Blood-group accuracy: 54.55% exact, 58.33% character
+- Unit-number accuracy: 100% exact, 100% character (layout-assisted)
+- Tests: 15 passed
+- Rows requiring review: 11 of 11
 - Accuracy report: `reports/sample_accuracy.json`
 
-Solution 2 improves exact accuracy by 2.57 percentage points and character accuracy by 14.34 percentage points. It is the current recommended configuration.
+Solution 3 is the current accuracy leader. Compared with Solution 1, it improves exact accuracy by 15.39 percentage points and character accuracy by 17.64 percentage points. The TrOCR Base model adds approximately 1.3 GB to the model cache; Solution 2 remains available when deployment size matters more than maximum measured accuracy.
 
 After the model has been downloaded once, run without model network access:
 
@@ -102,7 +117,8 @@ HF_HOME=.models HF_HUB_OFFLINE=1 .venv/bin/python -m table_ocr.cli \
   sample.jpeg \
   --output output/donors \
   --ground-truth ground_truth/sample.csv \
-  --name-engine trocr
+  --name-engine trocr \
+  --trocr-model microsoft/trocr-base-handwritten
 ```
 
 Unit numbers use the form's known sequential numbering to repair OCR and therefore score 100%; this is layout-assisted extraction, not pure handwriting recognition. The current result validates the local workflow and output format, but its handwriting accuracy is too low for unattended use. A correction screen should be part of the mobile/web MVP.
@@ -113,7 +129,7 @@ Unit numbers use the form's known sequential numbering to repair OCR and therefo
 .venv/bin/python -m pytest
 ```
 
-The current suite contains 13 tests covering preprocessing, recognizer routing, normalization, accuracy calculations, multi-image handling, error handling, CSV export, and XLSX export.
+The current suite contains 15 tests covering preprocessing, recognizer routing, blood polarity normalization, accuracy calculations, multi-image handling, error handling, CSV export, and XLSX export.
 
 ## Output Columns
 

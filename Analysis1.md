@@ -74,3 +74,16 @@ The controlled hybrid experiment uses TrOCR Small Handwritten for donor names, R
 - Complete-phone character accuracy improved from 53.33% to 80.00%.
 
 This is a meaningful improvement on the sample, but all rows still require review and the result is based on only one image. Fine-tuning should wait until a larger reviewed dataset is available.
+
+## Second Improvement Result
+
+The next experiment added a wider row-level fallback for blood-group polarity and benchmarked TrOCR Base Handwritten for donor names.
+
+- Overall exact-field accuracy improved to 53.85%.
+- Overall character accuracy improved to 80.00%.
+- Donor-name exact accuracy improved from 0% to 27.27%.
+- Donor-name character accuracy improved from 69.74% to 74.51%.
+- Blood-group exact accuracy improved from 36.36% to 54.55%.
+- Blood-group character accuracy improved from 41.67% to 58.33%.
+
+TrOCR Base adds approximately 1.3 GB to the model cache. It is suitable for the hosted backend accuracy path, while TrOCR Small remains a lower-footprint option.
