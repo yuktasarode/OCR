@@ -9,7 +9,7 @@ from openpyxl.utils import get_column_letter
 from table_ocr.models import TableRow
 
 
-HEADERS = ["source_image", "unit_no", "donor_name", "blood_group", "contact_no", "confidence", "needs_review", "raw_ocr"]
+HEADERS = ["source_image", "bag", "unit_no", "donor_name", "blood_group", "contact_no", "confidence", "needs_review", "raw_ocr"]
 
 
 def export_rows(rows: list[TableRow], output_stem: Path) -> tuple[Path, Path]:
@@ -33,7 +33,7 @@ def export_rows(rows: list[TableRow], output_stem: Path) -> tuple[Path, Path]:
         cell.fill = PatternFill("solid", fgColor="1F4E78")
     data_sheet.freeze_panes = "A2"
     data_sheet.auto_filter.ref = data_sheet.dimensions
-    widths = [24, 14, 30, 14, 18, 12, 14, 50]
+    widths = [24, 10, 14, 30, 14, 18, 12, 14, 50]
     for index, width in enumerate(widths, start=1):
         data_sheet.column_dimensions[get_column_letter(index)].width = width
 

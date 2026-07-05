@@ -86,6 +86,7 @@ The current suite contains 9 tests covering normalization, accuracy calculations
 | Column | Meaning |
 | --- | --- |
 | `source_image` | Input image that produced the row |
+| `bag` | Raw OCR value from the form's `BAG` column |
 | `unit_no` | Extracted registration unit number |
 | `donor_name` | Extracted handwritten donor name |
 | `blood_group` | Normalized blood group such as `B+` |

@@ -11,6 +11,7 @@ class TableRow:
     confidence: float
     needs_review: bool
     raw_ocr: str
+    bag: str = ""
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)

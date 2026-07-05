@@ -16,6 +16,7 @@ def load_rows(path: Path) -> list[TableRow]:
                 float(record.get("confidence", 0) or 0),
                 str(record.get("needs_review", "")).lower() == "true",
                 record.get("raw_ocr", ""),
+                record.get("bag", ""),
             )
             for record in csv.DictReader(handle)
         ]

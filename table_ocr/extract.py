@@ -11,6 +11,7 @@ from table_ocr.normalize import normalize_blood_group, normalize_name, normalize
 
 ROW_BOUNDARY_RATIOS = (0.228, 0.283, 0.349, 0.416, 0.486, 0.554, 0.623, 0.694, 0.772, 0.851, 0.932, 1.0)
 COLUMN_RATIOS = {
+    "bag": (0.0, 0.082),
     "unit": (0.083, 0.238),
     "name": (0.239, 0.625),
     "blood": (0.626, 0.766),
@@ -61,9 +62,10 @@ class FormExtractor:
             blood_group = normalize_blood_group(values["blood"])
             contact_no = normalize_phone(values["phone"])
             confidence = round(sum(confidences) / len(confidences), 4) if confidences else 0.0
-            raw = " | ".join(values[field] for field in ("unit", "name", "blood", "phone"))
+            bag = re.sub(r"\s+", " ", values["bag"]).strip()
+            raw = " | ".join(values[field] for field in ("bag", "unit", "name", "blood", "phone"))
             needs_review = confidence < 0.75 or not name or not blood_group or len(contact_no) != 10
-            rows.append(TableRow(image_path.name, unit, name, blood_group, contact_no, confidence, needs_review, raw))
+            rows.append(TableRow(image_path.name, unit, name, blood_group, contact_no, confidence, needs_review, raw, bag))
         return rows
 
 

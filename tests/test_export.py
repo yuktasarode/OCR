@@ -16,4 +16,5 @@ def test_export_rows_writes_csv_and_xlsx(tmp_path):
     assert records[0]["donor_name"] == "Leena Desai"
     workbook = load_workbook(xlsx_path)
     assert workbook.sheetnames == ["Data", "Summary"]
-    assert workbook["Data"]["B2"].value == "B-1"
+    assert workbook["Data"]["B1"].value == "bag"
+    assert workbook["Data"]["C2"].value == "B-1"
